@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: screenHeight * 0.30,
               width: screenWidth,
               child: Image.asset(
-                "assets/images/login1.png",
+                "assets/images/login.png",
                 fit: BoxFit.cover,
               )),
           const SizedBox(
