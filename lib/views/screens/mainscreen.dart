@@ -5,6 +5,7 @@ import 'package:barterit2/views/screens/accounttabscreen.dart';
 
 import '../../models/user.dart';
 import 'bartertabscreen.dart';
+import 'itemtabscreen.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -26,9 +27,8 @@ class _MainScreenState extends State<MainScreen> {
     print(widget.user.name);
     print("Mainscreen");
     tabchildren = [
-      BarterTabScreen(
-        user: widget.user,
-      ),
+      BarterTabScreen(user: widget.user,),
+      ItemTabScreen(user: widget.user,),
       AccountTabScreen(user: widget.user),
     ];
   }
@@ -56,6 +56,11 @@ class _MainScreenState extends State<MainScreen> {
                 label: "Barter"),
             BottomNavigationBarItem(
                 icon: Icon(
+                  Icons.shopping_basket,
+                ),
+                label: "Item"),    
+            BottomNavigationBarItem(
+                icon: Icon(
                   Icons.account_circle_rounded,
                 ),
                 label: "Account"),
@@ -68,6 +73,9 @@ class _MainScreenState extends State<MainScreen> {
       _currentIndex = value;
       if (_currentIndex == 0) {
         maintitle = "Barter";
+      }
+      if (_currentIndex == 1) {
+        maintitle = "Item";
       }
       if (_currentIndex == 2) {
         maintitle = "Account";
