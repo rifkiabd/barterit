@@ -15,6 +15,7 @@ class ItemDetailsScreen extends StatefulWidget {
 }
 
 class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
+  String maintitle = "Item Detail";
   final df = DateFormat('dd-MM-yyyy hh:mm a');
 
   late double screenHeight, screenWidth, cardwitdh;
@@ -25,7 +26,9 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
     screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(maintitle),
+      ),
       body: Column(
         children: [
           Flexible(
@@ -89,7 +92,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                   TableRow(children: [
                     const TableCell(
                       child: Text(
-                        "Catch Type",
+                        "Item Type",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -102,7 +105,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                   TableRow(children: [
                     const TableCell(
                       child: Text(
-                        "Quantity Available",
+                        "QTY Available",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
