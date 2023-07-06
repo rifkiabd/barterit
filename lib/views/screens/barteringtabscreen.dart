@@ -23,6 +23,9 @@ class _BarteringTabScreenState extends State<BarteringTabScreen> {
   List<Catch> catchList = <Catch>[];
   late double screenHeight, screenWidth;
   late int axiscount = 2;
+  late int currentPage = 1;
+  int catchesPerPage = 6; 
+  late int totalPages = 0;
 
   TextEditingController searchController = TextEditingController();
 
@@ -79,55 +82,99 @@ class _BarteringTabScreenState extends State<BarteringTabScreen> {
                   child: GridView.count(
                     crossAxisCount: axiscount,
                     children: List.generate(
-                      catchList.length,
+                      catchesPerPage,
                       (index) {
-                        return Card(
-                          child: InkWell(
-                            onTap: () async {
-                              Catch singlecatch =
-                                  Catch.fromJson(catchList[index].toJson());
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (content) => ItemDetailsScreen(
-                                    user: widget.user,
-                                    usercatch: singlecatch,
+                        final catchIndex = (currentPage - 1) * catchesPerPage + index;
+                        if (catchIndex < catchList.length) {
+                          final catchItem = catchList[catchIndex];
+                          return Card(
+                            child: InkWell(
+                              onTap: () async {
+                                Catch singlecatch = Catch.fromJson(catchItem.toJson());
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (content) => ItemDetailsScreen(
+                                      user: widget.user,
+                                      usercatch: singlecatch,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: CachedNetworkImage(
-                                    width: screenWidth,
-                                    fit: BoxFit.cover,
-                                    imageUrl:
-                                        "${MyConfig().SERVER}/barterit/assets/catches/${catchList[index].catchId}_0.png?v=${DateTime.now().millisecondsSinceEpoch}",
-                                    placeholder: (context, url) =>
-                                        const LinearProgressIndicator(),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error),
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: CachedNetworkImage(
+                                      width: screenWidth,
+                                      fit: BoxFit.cover,
+                                      imageUrl:
+                                          "${MyConfig().SERVER}/barterit/assets/catches/${catchItem.catchId}_0.png?v=${DateTime.now().millisecondsSinceEpoch}",
+                                      placeholder: (context, url) =>
+                                          const LinearProgressIndicator(),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  catchList[index].catchName.toString(),
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                                Text(
-                                  "RM ${double.parse(catchList[index].catchPrice.toString()).toStringAsFixed(2)}",
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                Text(
-                                  "${catchList[index].catchQty} available",
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ],
+                                  Text(
+                                    catchItem.catchName.toString(),
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                  Text(
+                                    "RM ${double.parse(catchItem.catchPrice.toString()).toStringAsFixed(2)}",
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  Text(
+                                    "${catchItem.catchQty} available",
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
                       },
                     ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                     ElevatedButton(
+                        onPressed: currentPage > 1 ? previousPage : null,
+                        child: Row(
+                          children: const [
+                            Icon(
+                              Icons.arrow_circle_left,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 5),
+                            Text("Page"),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "Page $currentPage of $totalPages",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                     ElevatedButton(
+                      onPressed: currentPage < totalPages ? nextPage : null,
+                      child: Row(
+                        children: const [
+                          Text("Page"),
+                          SizedBox(width: 5),
+                          Icon(
+                            Icons.arrow_circle_right,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    ],
                   ),
                 ),
               ],
@@ -152,25 +199,43 @@ class _BarteringTabScreenState extends State<BarteringTabScreen> {
             catchList.add(Catch.fromJson(v));
           });
           print(catchList[0].catchName);
+          calculateTotalPages(); // Calculate the total number of pages
         }
         setState(() {});
       }
     });
   }
 
+  void calculateTotalPages() {
+    totalPages = (catchList.length / catchesPerPage).ceil();
+  }
+
+  void previousPage() {
+    setState(() {
+      currentPage--;
+    });
+  }
+  void nextPage() {
+    setState(() {
+      currentPage++;
+    });
+  }
+
+
   void showsearchDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          ),
-          title: const Text(
-            "Search?",
-            style: TextStyle(),
-          ),
-          content: Column(
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+        title: const Text(
+          "Search?",
+          style: TextStyle(),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
@@ -194,42 +259,43 @@ class _BarteringTabScreenState extends State<BarteringTabScreen> {
               )
             ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text(
-                "Close",
-                style: TextStyle(),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text(
+              "Close",
+              style: TextStyle(),
             ),
-          ],
-        );
-      },
-    );
-  }
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
-  void searchCatch(String search) {
-    http
-        .post(
-          Uri.parse("${MyConfig().SERVER}/barterit/load_catches.php"),
-          body: {"search": search},
-        )
-        .then((response) {
-      log(response.body);
-      catchList.clear();
-      if (response.statusCode == 200) {
-        var jsondata = jsonDecode(response.body);
-        if (jsondata['status'] == "success") {
-          var extractdata = jsondata['data'];
-          extractdata['catches'].forEach((v) {
-            catchList.add(Catch.fromJson(v));
-          });
-          print(catchList[0].catchName);
-        }
-        setState(() {});
+void searchCatch(String search) {
+  http
+      .post(
+        Uri.parse("${MyConfig().SERVER}/barterit/load_catches.php"),
+        body: {"search": search},
+      )
+      .then((response) {
+    log(response.body);
+    catchList.clear();
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body);
+      if (jsondata['status'] == "success") {
+        var extractdata = jsondata['data'];
+        extractdata['catches'].forEach((v) {
+          catchList.add(Catch.fromJson(v));
+        });
+        print(catchList[0].catchName);
       }
-    });
-  }
+      setState(() {});
+    }
+  });
+}
 }
