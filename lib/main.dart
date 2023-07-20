@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'splashscreen.dart';
+import 'views/screens/shared/splashscreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,9 +20,7 @@ class MyApp extends StatelessWidget {
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
-            // Add any other desired text style properties
           ),
-          // Define additional text styles as needed
         ),
       ),
       home: const SplashScreen(),
